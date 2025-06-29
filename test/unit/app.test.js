@@ -1,8 +1,8 @@
 const request = require('supertest');
-const app = require('../src/app');
+const app = require('../../src/app');
 
-describe('Endpoints', () => {
-  test('GET /ping', async () => {
+describe('Unit Tests', () => {
+  test('GET /ping returns pong', async () => {
     const res = await request(app).get('/ping');
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('message', 'pong');
@@ -18,12 +18,12 @@ describe('Endpoints', () => {
     expect(res.body.result).toBe(2);
   });
 
-  test('GET /sum missing params', async () => {
+  test('GET /sum missing params returns 400', async () => {
     const res = await request(app).get('/sum?a=5');
     expect(res.statusCode).toBe(400);
   });
 
-  test('GET /unknown route', async () => {
+  test('GET /unknown route returns 404', async () => {
     const res = await request(app).get('/doesnotexist');
     expect(res.statusCode).toBe(404);
   });

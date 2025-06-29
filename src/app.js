@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
-require('dotenv').config();
+require('dotenv-flow').config();
 
 app.use(express.json());
 
 app.get('/ping', (req, res) => {
-  res.json({ message: 'pong' });
+  res.json({ message: process.env.MESSAGE || 'pong' });
 });
 
 app.get('/sum', (req, res) => {
