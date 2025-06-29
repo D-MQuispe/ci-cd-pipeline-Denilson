@@ -46,7 +46,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact
+          name: build-artifact-${{ matrix.node-version }}
           path: build/
 
       - name: Deploy to Vercel
@@ -58,7 +58,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            github.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: "🚨 CI/CD Pipeline Failed",
