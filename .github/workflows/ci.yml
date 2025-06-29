@@ -1,8 +1,8 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
     branches:
@@ -16,9 +16,51 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - run: npm ci
-      - run: npm test
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build Project
+        run: |
+          mkdir build
+          echo "Build artifact created on $(date)" > build/artifact.txt
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: build/
+
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main' && success()
+        run: echo "Deployment handled automatically by Vercel"
+
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "🚨 CI/CD Pipeline Failed",
+              body: "The pipeline failed for commit ${{ github.sha }}.\nPlease investigate the issue.\n"
+            })
